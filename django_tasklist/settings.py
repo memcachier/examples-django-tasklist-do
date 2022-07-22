@@ -133,3 +133,33 @@ STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
 # https://docs.djangoproject.com/en/4.0/ref/settings/#default-auto-field
 
 DEFAULT_AUTO_FIELD = 'django.db.models.BigAutoField'
+
+def get_cache():
+  import os
+  try:
+    servers = os.environ['MEMCACHIER_SERVERS']
+    username = os.environ['MEMCACHIER_USERNAME']
+    password = os.environ['MEMCACHIER_PASSWORD']
+    return {
+      'default': {
+        'BACKEND': 'django_bmemcached.memcached.BMemcached',
+        # TIMEOUT is not the connection timeout! It's the default expiration
+        # timeout that should be applied to keys! Setting it to `None`
+        # disables expiration.
+        'TIMEOUT': None,
+        'LOCATION': servers,
+        'OPTIONS': {
+          'username': username,
+          'password': password,
+        }
+      }
+    }
+  except:
+    return {
+      'default': {
+        'BACKEND': 'django.core.cache.backends.locmem.LocMemCache'
+      }
+    }
+
+CACHES = get_cache()
+
